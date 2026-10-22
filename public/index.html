@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>World of Irreversible Change — Ren &amp; Sora</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <canvas id="world-canvas"></canvas>
+
+  <!-- Minimalist Top-Left Corner Bar: Expand/Collapse Panels + Live AI API Link Status Icon -->
+  <div class="corner-controls">
+    <button id="btn-toggle-ui" class="ui-toggle-btn" title="Show / Hide World Controls &amp; Character Mind">
+      <span class="seal-mini">無常</span>
+      <span id="ui-toggle-label">▾ Open Panels</span>
+    </button>
+    <button id="btn-ai-status-mini" class="ai-status-mini" title="Click to configure or test AI API Link">
+      <span id="ai-status-dot" class="status-dot standby"></span>
+      <span id="ai-status-mini-text">AI Link</span>
+    </button>
+  </div>
+
+  <!-- Top HUD Bar (Hidden by default per user request) -->
+  <header id="hud-top" class="hidden">
+    <div class="brand-block">
+      <span class="seal">無常</span>
+      <div>
+        <h1>World of Irreversible Change</h1>
+        <p id="clock-label">Awakening the valley…</p>
+      </div>
+    </div>
+
+    <div class="env-pills">
+      <span id="weather-pill" class="pill">…</span>
+      <span id="ai-pill" class="pill pill-gold" title="Autonomous Cognition Engine">AI Mind: Ready</span>
+    </div>
+
+    <nav class="hud-actions">
+      <div id="char-buttons" class="btn-group"></div>
+      <button id="btn-clearing" class="hud-btn" title="Zoom to Genesis Clearing">Clearing</button>
+      <button id="btn-basin" class="hud-btn" title="Zoom out to full circular basin">Full Basin</button>
+      <button id="btn-lantern" class="hud-btn" title="Click water to release a floating paper lantern">✦ Offer Lantern</button>
+      <button id="btn-chronicle" class="hud-btn" title="Read the living history scroll">📜 Chronicle</button>
+      <button id="btn-audio" class="hud-btn" title="Toggle generative river &amp; koto soundscape">♫ Sound: Off</button>
+      <button id="btn-ai-settings" class="hud-btn" title="Configure Free Gemini / Groq API Key">⚙ AI Key</button>
+      <button id="btn-reset-world" class="hud-btn btn-danger" title="Fully reset characters, memories, structures &amp; terrain">↺ Full Reset</button>
+    </nav>
+  </header>
+
+  <!-- Left Drawer: Character Mind & Somatic Inspector (Hidden by default per user request) -->
+  <aside id="inspector-panel" class="scroll-panel hidden">
+    <div class="panel-header">
+      <div>
+        <h2 id="insp-name">Ren</h2>
+        <span id="insp-subtitle" class="subtitle">Founder · Generation 1</span>
+      </div>
+      <button id="btn-follow-toggle" class="small-btn">Follow</button>
+    </div>
+
+    <div class="thought-box">
+      <div class="thought-meta">
+        <span class="tag-label">INNER STREAM</span>
+        <span id="insp-feeling" class="feeling-badge">quiet wonder</span>
+      </div>
+      <blockquote id="insp-thought">“Opening my eyes to the quiet rustle of leaves…”</blockquote>
+      <div id="insp-activity" class="activity-line">Currently: taking in the unfamiliar forest</div>
+    </div>
+
+    <section class="panel-section">
+      <h3>Flesh, Bone &amp; Nerve (Somatic Senses)</h3>
+      <ul id="insp-somatic-notes" class="somatic-notes"></ul>
+      <div id="insp-bars" class="bars-grid"></div>
+    </section>
+
+    <section class="panel-section">
+      <h3>Relationships &amp; How They Treat Each Other</h3>
+      <div id="insp-bonds" class="struct-list"></div>
+    </section>
+
+    <section class="panel-section">
+      <h3>Discovered &amp; Named (<span id="insp-known-count">0</span>)</h3>
+      <div id="insp-known-list" class="chip-list"></div>
+    </section>
+
+    <section class="panel-section">
+      <h3>Tools &amp; Carried Items</h3>
+      <div id="insp-inventory" class="chip-list"></div>
+    </section>
+
+    <section class="panel-section">
+      <h3>Lived Memories</h3>
+      <ul id="insp-memories" class="memory-list"></ul>
+    </section>
+  </aside>
+
+  <!-- Right Drawer: The Golden Chronicle & Architecture -->
+  <aside id="chronicle-panel" class="scroll-panel hidden">
+    <div class="panel-header">
+      <div>
+        <h2>The Golden Chronicle</h2>
+        <span class="subtitle">Irreversible History of the Basin</span>
+      </div>
+      <button id="btn-close-chronicle" class="small-btn">✕</button>
+    </div>
+
+    <section class="panel-section">
+      <h3>Structures &amp; Works (<span id="struct-count">0</span>)</h3>
+      <div id="struct-list" class="struct-list"></div>
+    </section>
+
+    <section class="panel-section">
+      <h3>Recorded Epochs</h3>
+      <ul id="chronicle-list" class="chronicle-list"></ul>
+    </section>
+  </aside>
+
+  <!-- Lantern Offering Banner -->
+  <div id="lantern-banner" class="floating-banner hidden">
+    <span>Click anywhere on the lake or rivers to set a glowing paper lantern afloat</span>
+    <input id="lantern-msg" type="text" maxlength="90" value="May warmth and peace stay in this valley" />
+    <button id="btn-cancel-lantern" class="small-btn">Done</button>
+  </div>
+
+  <!-- Free AI Key Modal -->
+  <div id="ai-modal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="panel-header">
+        <h2>Autonomous AI Cognition (100% Free)</h2>
+        <button id="btn-close-modal" class="small-btn">✕</button>
+      </div>
+      <p class="modal-desc">
+        Ren and Sora think using a <strong>100% free</strong> cascading AI pipeline. Out of the box, they use the keyless free cloud LLM + Somatic-Epistemic Engine. You can also paste a free <strong>Google AI Studio (Gemini Flash)</strong> or <strong>Groq</strong> key for even deeper reflections.
+      </p>
+      <label class="field-label">
+        Google Gemini Free API Key (optional, from aistudio.google.com)
+        <input id="input-gemini-key" type="password" placeholder="AIzaSy..." />
+      </label>
+      <label class="field-label">
+        Groq Free API Key (optional, from console.groq.com)
+        <input id="input-groq-key" type="password" placeholder="gsk_..." />
+      </label>
+      <div id="ai-test-banner" class="ai-test-banner">
+        Status: Waiting to test API link…
+      </div>
+      <div class="modal-actions" style="gap: 8px;">
+        <button id="btn-save-ai" class="hud-btn active">Save &amp; Test API Link</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full Reset Confirmation Modal -->
+  <div id="reset-modal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="panel-header">
+        <h2>Full World Reset</h2>
+        <button id="btn-close-reset" class="small-btn">✕</button>
+      </div>
+      <p class="modal-desc">
+        This will completely wipe <strong>Ren and Sora's memories, discovered species, tools, buildings, worn footpaths, and history</strong>, returning them to Dawn of Year 1, Day 1 as blank slates.
+      </p>
+      <div class="modal-actions" style="gap: 8px; flex-wrap: wrap;">
+        <button id="btn-confirm-reset-same" class="hud-btn active">Reset Memories &amp; World (Same Terrain)</button>
+        <button id="btn-confirm-reset-new" class="hud-btn btn-danger">Full Reset + Generate New Terrain Map</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

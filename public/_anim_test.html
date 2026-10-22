@@ -1,0 +1,100 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <style>
+    body { margin: 0; background: #080f1c; color: #f6e3a4; font-family: Georgia, serif; }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+  <canvas id="c" width="1440" height="900"></canvas>
+  <script type="module">
+    import { drawDetailedCharacter } from '/artAtlas.js';
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = '#091120';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.scale(2.0, 2.0);
+
+    const drawLabel = (txt, x, y) => {
+      ctx.save();
+      ctx.font = '8px Georgia, serif';
+      ctx.fillStyle = 'rgba(248, 222, 142, 0.85)';
+      ctx.textAlign = 'center';
+      ctx.fillText(txt, x, y);
+      ctx.restore();
+    };
+
+    // Row 1: Male Tunic Villager (Ren) Walk Cycle (Right & Left — compare directly with 06c3e32d.png & 5f10f972.png)
+    for (let i = 0; i < 6; i++) {
+      const phase = (i / 6) * Math.PI * 2;
+      const isLeft = i >= 4;
+      const heading = isLeft ? Math.PI - 0.12 : 0.12;
+      const dirX = isLeft ? -1 : 1;
+      const x = 65 + i * 115;
+      const y = 128;
+      const c = {
+        id: 'ren',
+        name: 'Ren',
+        sex: 'm',
+        ageYears: 21,
+        growthScale: 1.0,
+        moving: true,
+        heading,
+        posture: 'standing',
+        appearance: { garmentStyle: 'tunic', hairStyle: 'topknot', headgear: 'none', accessory: 'rope_coil', robeHue: 30, innerHue: 20, sashHue: 42 },
+      };
+      const vis = { x: 0, y: 0, heading, facingDirX: dirX, facingMix: dirX, walkCycle: phase, moveBlend: 1.0 };
+      drawDetailedCharacter(ctx, c, vis, { x, y }, 26, 1.5 + i * 0.2, false);
+      drawLabel(isLeft ? `Walk Left φ=${i}` : `Walk Right φ=${i}`, x, y + 18);
+    }
+
+    // Row 2: Female Robed Villager (Sora) Walk Cycle & 8-Direction Turn Smoothness (compare with 60dffec5.png)
+    const headings = [0.0, 0.45, Math.PI * 0.5, Math.PI * 0.85, Math.PI, -Math.PI * 0.5];
+    const hNames = ['East (0°)', 'SE (25°)', 'South (90°)', 'SW (153°)', 'West (180°)', 'North (-90°)'];
+    for (let i = 0; i < 6; i++) {
+      const heading = headings[i];
+      const cosH = Math.cos(heading);
+      const dirX = cosH >= -0.05 ? 1 : -1;
+      const mixX = Math.abs(cosH) < 0.35 ? dirX * 0.45 : cosH;
+      const x = 65 + i * 115;
+      const y = 278;
+      const c = {
+        id: 'sora',
+        name: 'Sora',
+        sex: 'f',
+        ageYears: 20,
+        growthScale: 0.96,
+        moving: true,
+        heading,
+        posture: 'standing',
+        appearance: { garmentStyle: 'robed', hairStyle: 'shimada', headgear: 'kanzashi', accessory: 'sash_bow', robeHue: 22, innerHue: 14, sashHue: 38 },
+      };
+      const vis = { x: 0, y: 0, heading, facingDirX: dirX, facingMix: mixX, walkCycle: 0.85 + i * 0.9, moveBlend: 1.0 };
+      drawDetailedCharacter(ctx, c, vis, { x, y }, 26, 2.0 + i * 0.2, false);
+      drawLabel(`Robed ${hNames[i]}`, x, y + 18);
+    }
+
+    // Row 3: Actions (Chopping, Sawing, Hauling) & Child-to-Adult Hereditary Growth Stages
+    const row3 = [
+      { label: 'Chopping Tree', c: { sex: 'm', ageYears: 21, growthScale: 1.0, posture: 'chopping', heading: 0.15, appearance: { garmentStyle: 'tunic', hairStyle: 'topknot', accessory: 'gourd' } }, vis: { heading: 0.15, facingDirX: 1, facingMix: 1, walkCycle: 0, moveBlend: 0 } },
+      { label: 'Sawing Log', c: { sex: 'f', ageYears: 20, growthScale: 0.96, posture: 'sawing', heading: 0.15, appearance: { garmentStyle: 'artisan', hairStyle: 'ponytail', headgear: 'hachimaki', robeHue: 195 } }, vis: { heading: 0.15, facingDirX: 1, facingMix: 1, walkCycle: 0, moveBlend: 0 } },
+      { label: 'Hauling Timber', c: { sex: 'm', ageYears: 22, growthScale: 1.02, posture: 'hauling', hauling: { kind: 'log_chunk' }, moving: true, heading: 0.1, appearance: { garmentStyle: 'tunic', headgear: 'sugegasa' } }, vis: { heading: 0.1, facingDirX: 1, facingMix: 1, walkCycle: 1.0, moveBlend: 1 } },
+      { label: 'Child (Age 3, 50%)', c: { sex: 'f', ageYears: 3, growthScale: 0.50, moving: true, heading: 0.15, appearance: { garmentStyle: 'tunic', hairStyle: 'twin_buns', headgear: 'ribbon', robeHue: 345, innerHue: 18 } }, vis: { heading: 0.15, facingDirX: 1, facingMix: 1, walkCycle: 0.8, moveBlend: 1 } },
+      { label: 'Child (Age 9, 72%)', c: { sex: 'm', ageYears: 9, growthScale: 0.72, moving: true, heading: 0.15, appearance: { garmentStyle: 'artisan', hairStyle: 'ponytail', accessory: 'satchel', robeHue: 145, innerHue: 35 } }, vis: { heading: 0.15, facingDirX: 1, facingMix: 1, walkCycle: 0.9, moveBlend: 1 } },
+      { label: 'Youth (Age 15, 91%)', c: { sex: 'f', ageYears: 15, growthScale: 0.91, moving: true, heading: -3.0, appearance: { garmentStyle: 'robed', hairStyle: 'shimada', headgear: 'kanzashi', robeHue: 265, innerHue: 28 } }, vis: { heading: -3.0, facingDirX: -1, facingMix: -1, walkCycle: 0.9, moveBlend: 1 } },
+    ];
+    for (let i = 0; i < row3.length; i++) {
+      const item = row3[i];
+      const x = 65 + i * 115;
+      const y = 424;
+      drawDetailedCharacter(ctx, item.c, item.vis, { x, y }, 26, 1.72, false);
+      drawLabel(item.label, x, y + 18);
+    }
+    ctx.restore();
+  </script>
+</body>
+</html>
